@@ -1,0 +1,87 @@
+#include <bits/stdc++.h>
+using namespace std;
+char mp[1000][1000];
+int y_size=0;
+int x_size=0;
+int best[1000][1000];
+int dir_y[]={-1,1,0,0};
+int dir_x[]={0,0,-1,1};
+
+int oob(int y,int x)
+{
+    if(y<0 || y>= y_size) return 1;
+    if(x<0 || x>= x_size) return 1;
+    return 0;
+}
+
+int move_able(int y1,int x1, int y2,int x2)
+{
+    if(oob(y2,x2)) return 0;
+    if(mp[y2][x2] <= mp[y1][x1] + 1) return 1;
+    return 0;
+}
+
+int start_x=-1, start_y=-1;
+int goal_x=-1,goal_y=-1;
+struct pnt_t{
+    int y;
+    int x;
+    int steps;
+    pnt_t() = default;
+    pnt_t(int a,int b,int c): y(a),x(b),steps(c) {};
+};
+int main(){
+    for(int i=0;;i++){
+	if(scanf("%s",mp[i])!=1) break;
+	y_size++;
+    }
+    x_size=strlen(mp[0]);
+    for(int y=0;y<y_size;y++) {
+	for(int x=0;x<x_size;x++) {
+	    best[y][x]=999999;
+	    if(mp[y][x]=='S') {
+		mp[y][x]='a';
+		start_y=y;
+		start_x=x;
+	    }
+	    if(mp[y][x]=='E'){
+		mp[y][x]='z';
+		goal_y=y;
+		goal_x=x;
+	    }
+	}
+    }
+    deque< pnt_t > q;
+    auto s= pnt_t(start_y,start_x,0);
+    q.push_back(s);
+    while(!q.empty()) {
+	auto e= q.front();
+	q.pop_front();
+	for(int i=0;i<4;i++)
+	{
+	    int new_y= e.y+dir_y[i];
+	    int new_x= e.x+dir_x[i];
+	    int ns= e.steps+1;
+	    if(! move_able(e.y,e.x,new_y,new_x)) continue;
+	    if(ns < best[new_y][new_x]) {
+		best[new_y][new_x]= ns;
+		auto t= pnt_t{new_y,new_x,ns};
+		q.push_back(t);
+	    }
+	}
+    }
+    printf("<goal=%d %d>",goal_y,goal_x);
+    for(int y=0;y<y_size;y++)
+    {
+	for(int x=0;x<x_size;x++){
+	    printf("<%d>",best[y][x]);
+	}
+	printf("\n");
+    }
+
+    printf("<ans=%d>\n", best[goal_y][goal_x]);
+    
+    
+    return 0;
+}
+

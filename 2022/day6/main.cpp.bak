@@ -1,0 +1,38 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#ifdef TEST
+int test=1;
+#else
+int test=0;
+#endif
+
+int main()
+{
+    int ans=0;
+    char s[100000];
+    scanf("%s",s);
+    int len=strlen(s);
+    char h[128]={0};
+    const int n=14;
+    for(int i=n-1;i<len;i++)
+    {
+            memset(h,0,sizeof(h));
+            int not_ok=0;
+            for(int j=0;j<n;j++)
+            {
+                    int c=s[i-j];
+                    if(h[c]) {
+                            not_ok=1;
+                            break;
+                    }
+                    h[c]++;
+            }
+            if(!not_ok)
+            {
+                    printf("%d",i);
+                    break;
+            }
+    }
+    return 0;
+}

@@ -1,0 +1,46 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+pair<int,int> next_tail(int head_y,int head_x, int tail_y, int tail_x){
+    if(head_x==tail_x && head_y==tail_y) return make_pair(tail_y,tail_x);
+    if(abs(head_x-tail_x)==2) {
+	return make_pair(head_y, (head_x+tail_x)/2);
+    }
+    if(abs(head_y-tail_y)==2) {
+	return make_pair((head_y+tail_y)/2, head_x );
+    }
+    return make_pair(tail_y,tail_x);
+}
+int main(){
+    map<char,int> dir_x,dir_y;
+    dir_x['D']=0;dir_y['D']=1;
+    dir_x['U']=0;dir_y['U']=-1;
+    dir_x['L']=-1;dir_y['L']=0;
+    dir_x['R']=1;dir_y['R']=0;
+
+    map<pair<int,int>,int> vis;
+    
+    int head_x=0,head_y=0;
+    int tail_x=0,tail_y=0;
+    int ans;
+    vis[make_pair(0,0)]=1;
+    for(int i=0;;i++){
+	char s[10];int n;
+	if(scanf("%s %d",s,&n)!=2) break;
+	char c=s[0];
+	for(int j=0;j<n;j++)
+	{
+	    head_x+=dir_x[c];
+	    head_y+=dir_y[c];
+
+	    auto t= next_tail(head_y,head_x,tail_y,tail_x);
+	    vis[t]=1;
+	    tail_y=t.first;
+	    tail_x=t.second;	    
+	}
+
+
+    }
+    printf("<ans=%d>",(int)vis.size());
+    return 0;
+}

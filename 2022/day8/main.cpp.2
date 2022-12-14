@@ -1,0 +1,55 @@
+::q#include <bits/stdc++.h>
+using namespace std;
+char f[1000][1000];
+int out_of_bound(int n, int m,int y,int x)
+{
+        if(y<0 ||y>=n) return 1;
+        if(x<0 ||x>=m) return 1;
+        return 0;
+}
+int dir[4][2]={{-1,0},{1,0},{0,1},{0,-1}};
+long cal_score(int n,int m, int y,int x) {
+        long sum=1;
+        for(int i=0;i<4;i++)
+        {
+                int score1=0;
+                for(int j=1;;j++)
+                {
+                        int y_new=y+dir[i][0]*j;
+                        int x_new=x+dir[i][1]*j;
+                        if(out_of_bound(n,m,y_new,x_new)){
+                                break;
+                        }
+                        if( f[y_new][x_new] >=f[y][x] )
+                        {
+                                score1++;
+                                break;
+                        }
+                        score1++;
+                }
+                sum*=score1;
+        }
+        return sum;
+}
+int main(){
+        int n=0;
+        for(int i=0;;i++){
+                if(scanf("%s",f[i])!=1) break;
+                n++;
+        }
+        int m= strlen(f[0]);
+        printf("<%d %d>\n",n,m);
+        long max_score=0;
+        for(int i=0;i<n;i++)
+        {
+                for(int j=0;j<m;j++)
+                {
+                        long score=cal_score(n,m,i,j);
+                        printf("<%ld>",score);
+                        max_score=max(max_score,score);
+                }
+                printf("\n");
+        }
+        printf("<<%ld>>",max_score);
+        return 0;
+}

@@ -1,0 +1,70 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+
+char f[1000][1000];
+char v[1000][1000];
+int main(){
+        int n=0;
+        for(int i=0;;i++){
+                if(scanf("%s",f[i])!=1) break;
+                n++;
+        }
+        int m= strlen(f[0]);
+        printf("<%d %d>\n",n,m);
+        memset(v,0,sizeof(v));
+        for(int i=0;i<m;i++)
+        {
+                int max;
+                for(int j=0;j<n;j++)
+                {
+                        if(j==0) {v[j][i]=1; max=f[j][i];}
+                        if(f[j][i]>max) {
+                                v[j][i]=1;
+                                max=f[j][i];
+                        }
+                }
+            
+                for(int j=n-1;j>=0;j--)
+                {
+                        if(j==n-1) {v[j][i]=1; max=f[j][i];}
+                        if(f[j][i]>max) {
+                                v[j][i]=1;
+                                max=f[j][i];
+                        }
+                }
+        }
+        for(int i=0;i<n;i++)
+        {
+                int max;
+                for(int j=0;j<m;j++)
+                {
+                        if(j==0) {f[i][j]=1; max=f[i][j];}
+                        if(f[i][j]>max) {
+                                v[i][j]=1;
+                                max=f[i][j];
+                        }
+                }
+                for(int j=m-1;j>=0;j--)
+                {
+                        if(j==m-1) {v[i][j]=1; max=f[i][j];}
+                        if(f[i][j]>max) {
+                                v[i][j]=1;
+                                max=f[i][j];
+                        }
+                }
+        }
+        int cnt=0;
+        for(int i=0;i<n;i++)
+        {
+                for(int j=0;j<m;j++)
+                {
+                        printf("%d",v[i][j]);
+                        if(v[i][j]) cnt++;
+                }
+                printf("\n");
+        }
+        printf("<<%d>>\n",cnt);
+
+        return 0;
+}

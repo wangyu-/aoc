@@ -1,0 +1,69 @@
+#include <bits/stdc++.h>
+using namespace std;
+vector<string> get_lines()
+{
+    vector<string> res;
+    string s;
+    while(getline(cin,s)) {
+	res.push_back(s);
+    }
+    return res;
+}
+vector<string> split_bc(const string &str,const string &in_sp)
+{
+    vector<string> res;
+    unordered_set<char> sp;
+    for(auto c: in_sp) sp.insert(c);
+    string current;
+    for(auto c: str){
+	if(sp.find(c)==sp.end()) {
+	    current+= c;
+	}else{
+	    if(!current.empty()) {
+		res.push_back(current);
+		current.clear();
+	    }
+	}
+    }
+    if(!current.empty()) res.push_back(current);
+    return res;
+}
+vector<string> split_bs(const string str,const string sp)
+{
+    vector<string> res;
+    size_t i=0, pos;
+    for(;;i=pos + sp.length()){
+	printf("[%d]",(int)i);
+	pos=str.find(sp,i);
+	if(pos==string::npos) {
+	    res.push_back(str.substr(i,pos));
+	    break;
+	}
+	else {
+	    res.push_back(str.substr(i,pos-i));
+	}
+    }
+    return res;
+}
+template <typename T>
+void prt_v(T & vec)
+{
+    for(int i=0;i<(int)vec.size();i++){
+	cout<<"<"<<vec[i]<<">";
+    }
+    cout<<endl;
+}
+int main(){
+    /*
+    auto lines=get_lines();
+    prt_v(lines);*/
+    char a[1000]="abcd abc";
+    auto lines2= split_bc(a, " ");
+    prt_v(lines2);
+    auto lines3= split_bc(" 1122 33 44 ", " ");
+    prt_v(lines3);
+    auto lines4= split_bs("123zong345zongzong", "zong");
+    prt_v(lines4);
+    return 0;
+}
+
