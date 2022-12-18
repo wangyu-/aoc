@@ -3,7 +3,6 @@
 using namespace std;
 #define pii pair<int,int>
 #define mkp make_pair
-string jet;
 int test=0;
 struct pnt_t {
     int y,x;
@@ -30,19 +29,9 @@ struct pnt_hash{
     size_t operator () (const pnt_t & a) const
 	{
 	    //return a.y+a.x;
-	    return a.y*100007 +a.x;
+	    return a.y*1000000007 +a.x;
 	}
 };
-
-vector<string> readlines()
-{
-    vector<string> res;
-    string s;
-    while(getline(cin,s)) {
-	res.push_back(s);
-    }
-    return res;
-}
 
 vector<vector<pnt_t> > pntss= {
     {{0,0},{0,1},{0,2},{0,3}},
@@ -94,6 +83,7 @@ struct room_t
 	    ub=min(ub, ab.y);
 	    assert(st.find(ab)==st.end());
 	    int before= (int)st.size();
+	    printf("<insert %d,%d>\n",ab.y,ab.x);
 	    st.insert(ab);
 	    int after=(int)st.size();
 	    pnt_hash h;
@@ -104,23 +94,12 @@ struct room_t
 	}
     }
 
-    void gc() {
-	//return;
-	//if( st.size()<10000 ) return;
-	
+    void gc2() {
 	int magic=10;
-	for(int x=0;x<7;x++) {
-	    pnt_t p= pnt_t{ub+magic,x};
-	    if(st.find(p)==st.end()) return;
-	}
-	//printf("gc!!\n");
 	decltype(st) tmp;
-	for(auto &e:st) {
+	for(auto e:st) {
 	    if(e.y <= ub+magic) tmp.insert(e);
 	}
-	//st=tmp;
-	st.clear();
-	for(auto &e:tmp) st.insert(e);
     }
 
     void prt(int n)
@@ -151,59 +130,21 @@ void prt_sample()
     printf("]\n");
 }
 int main(){
-    auto lines=readlines();
-    jet=lines[0];
-    printf("<len=%d>",(int)jet.size());
+    //printf("<len=%d>",(int)jet.size());
     for(int i=0;i<(int)pntss.size();i++){
 	shape_t shape;
         shapes[i].pnts=pntss[i];
 	shapes[i].init();
     }
-    
-    int cnt=0;
-    int last_ub= 0;
-    int lcm=jet.size()*5;
 
-    int last_check_size=1;
     long left=1000000000000;
-    long delta=0;
     for(int i=0;left>0;i++,left--){
-	room.gc();
-	if(i%(lcm) ==0 )
-	{
-	    if(i%(10*lcm)==0) {
-		//room.prt(50);
-	    }
-	    a.push_back(last_ub-room.ub);
-	    last_ub=room.ub;
-	    if((int)a.size() >= last_check_size*1.5) {
-		last_check_size=(int)a.size();
-		printf("<<current i=%d %d %d>>\n",i,(int)room.st.size(),(int)a.size());
-	    }
-	}
+	room.gc2();
 	
-	if(test) room.prt(50); 
 	int type= i%5;
 	pnt_t now = pnt_t{room.ub-4, 2};
-
 	for(int j=0;;j++)
 	{
-	    if(test)printf("<j:%d>\n",j);
-	    char c= jet[cnt%jet.size()]; cnt++;
-	    if(test)printf("<%d>",cnt);
-	    pnt_t dir1;
-	    if(c=='<') {
-		dir1.x=-1,dir1.y=0;
-	    }else {
-		dir1.x=1,dir1.y=0;
-	    }
-	    //assert(!room.conflict(now,type));
-	    pnt_t next1= pnt_t {now.y+ dir1.y, now.x+ dir1.x};
-	    if(!room.oob(next1,type ) && !room.conflict(next1,type)) {
-		now=next1;
-	    }
-	    if(test)printf("[after push %c, now %d %d]\n",c,now.y,now.x);
-		
 	    pnt_t next2= pnt_t {now.y+1,now.x};
 	    if(room.conflict(next2,type)) {
 		room.ins(now,type);
@@ -214,7 +155,5 @@ int main(){
 	    }
 	}
     }
-
-    printf("<ans=%d   delta=%ld    final=%ld>\n",room.ub,delta, room.ub-delta);
     return 0;
 }
