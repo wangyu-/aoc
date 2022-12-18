@@ -1,0 +1,96 @@
+#include <bits/stdc++.h>
+#include "mylibs.h"
+using namespace std;
+#define pii pair<int,int>
+#define mkp make_pair
+
+struct valv_t{
+    string name;
+    int idx;
+    int ps_idx=-1;
+    int rate;
+    vector<string> tos;
+    vector<int> tosi;
+};
+vector<valv_t> valvs;
+map<string,int> nti;
+map<string,int> nti_ps;
+int get_byte(int a,int n) {
+    return (a>>n)&0x1;
+}
+void set_byte(int &a,int n) {
+    a|= (1<<n);
+}
+
+int opt[35][65][65535];
+struct item_t{
+    int left;
+    int pos;
+    int state;
+    long long score=0;
+};
+int main(){
+    auto lines=get_lines();
+    int ps_cnt=0;
+    int start_pos=-1;
+    for(auto line: lines) {
+	valv_t valv;
+	char s[10]; int rate=-1;
+	sscanf(line.c_str(),"Valve %s has flow rate=%d",s,&rate);
+	string tmp= split_bs(line,"to valve")[1];
+	auto tos= split_bc(tmp,", s");
+	prt_arr(tos);
+	valv.name=s; valv.rate=rate;valv.tos=tos;
+	valv.idx=(int)valvs.size();
+	nti[valv.name]=valv.idx;
+	if(rate>0) {
+	    nti_ps[valv.name]=ps_cnt;
+	    valv.ps_idx=ps_cnt;
+	    ps_cnt++;
+	}
+	if(valv.name=="AA") {
+	    start_pos=valv.idx;
+	}
+	printf("<%s %d %d %d>",valv.name.c_str(),valv.rate,valv.idx,valv.ps_idx);
+	valvs.push_back(valv);
+    }
+    for(auto & valv: valvs) {
+	for(auto to : valv.tos) {
+	    valv.tosi.push_back(nti[to]);
+	}
+    }
+    memset(opt,-1,sizeof(opt));
+    item_t st; st.pos=start_pos; st.left=30;st.state=0;
+    opt[30][start_pos][0]=0;
+    queue<item_t> q;
+    long long mmax=0;
+    q.push(st);
+    while(!q.empty()) {
+	//printf("!\n");
+	item_t e= q.front();
+	q.pop();
+	int cur_pos=e.pos;
+	if(e.left==0) continue;
+	if(valvs[cur_pos].ps_idx!=-1 && get_byte(e.state, valvs[cur_pos].ps_idx)==0) {
+	    item_t e2=e;
+	    e2.left--;
+	    set_byte(e2.state, valvs[cur_pos].ps_idx);
+	    e2.score+= e2.left* valvs[cur_pos].rate;
+	    mmax= max(mmax,e2.score);
+	    if(e2.score > opt[e2.left][e2.pos][e2.state])  {
+		q.push(e2);
+		opt[e2.left][e2.pos][e2.state] = e2.score;
+	    }
+	}
+	for(auto  to: valvs[cur_pos].tosi) {
+	    item_t e2=e;
+	    e2.left--;
+	    e2.pos= to;
+	    if(e2.score > opt[e2.left][e2.pos][e2.state])  {q.push(e2);
+		opt[e2.left][e2.pos][e2.state] = e2.score;
+	    }
+	}
+    }
+    printf("<ans=%lld>\n", mmax);
+    return 0;
+}

@@ -1,0 +1,128 @@
+#include <bits/stdc++.h>
+#include "mylibs.h"
+using namespace std;
+#define pii pair<int,int>
+#define mkp make_pair
+string jet;
+vector<vector<pnt_t> > pntss= {
+    {{0,0},{0,1},{0,2},{0,3}},
+    {{1,1},{1,0},{1,2},{0,1},{2,1}},
+    {{0,0},{0,1},{0,2},{1,2},{2,2}},
+    {{0,0},{1,0},{2,0},{3,0}},
+    {{0,0},{0,1},{1,0},{1,1}}
+};
+struct shape_t
+{
+    vector<pnt_t> pnts;
+    int lm=0;
+    int rm=-1;
+    void init() {
+	for(int i=0;i<(int)pnts.size();i++){
+	    rm=max(rm, pnts[i].x);
+	}
+    }
+} shapes[5];
+
+//vector<string> room;
+
+struct room_t
+{
+    int ub=0;
+    unordered_map<pnt_t, char, pnt_hash> room;
+    int oob(pnt_t a, int type){
+	if(a.x<=0) return 1;
+	if(a.x+ shapes[type].rm >=8) return 1;
+	return 0;
+    }
+    int conflict(pnt_t a,int type){
+	for(auto rr: shapes[type].pnts) {
+	    pnt_t ab= pnt_t{a.y+rr.y,a.x+rr.x};
+	    if(ab.y>=0) return 1;
+	    if(room.find(ab)!=room.end()) {
+		return 1;
+	    }
+	}
+	return 0;
+    }
+    
+    void ins(pnt_t a,int type){
+	for(auto rr: shapes[type].pnts) {
+	    pnt_t ab= pnt_t{a.y+rr.y,a.x+rr.x};
+	    printf("<ins %d %d>\n",ab.y,ab.x);
+	    ub=min(ub, ab.y);
+	    //assert(room.find(ab)==room.end());
+	    room[ab]=1;
+	}
+    }
+
+    void prt()
+	{
+	    printf("-----<ub=%d  %d>-----\n",ub,(int)room.size());
+	    for(int y=ub;y<0;y++)
+	    {
+		for(int x=0;x<7;x++) {
+		    pnt_t p= pnt_t{y,x};
+		    if(room.find(p)!=room.end()){
+			printf("#");
+		    }else{
+			printf(".");
+		    }
+		}
+		printf("\n");
+	    }
+	}
+    
+    
+}room;
+int main(){
+    auto lines=readlines();
+    jet=lines[0];
+    for(int i=0;i<(int)pntss.size();i++){
+	//printf("<%d>",i);
+	shape_t shape;
+        shapes[i].pnts=pntss[i];
+	shapes[i].init();
+    }
+
+    int cnt=0;
+    for(int i=0;i<3;i++){
+	//if(i<5)
+	room.prt(); 
+	int type= i%5;
+	pnt_t now = pnt_t{room.ub-4, 2};
+
+	for(int j=0;;j++)
+	{
+	    printf("<j:%d>\n",j);
+	    char c= jet[cnt]; cnt++;
+	    pnt_t dir1;
+	    if(c=='<') {
+		dir1.x=-1,dir1.y=0;
+	    }else {
+		dir1.x=1,dir1.y=0;
+	    }
+	    pnt_t next1= pnt_t {now.y+ dir1.y, now.x+ dir1.x};
+	    if(!room.oob(next1,type )) {
+		now=next1;
+	    }
+	    printf("<now %d %d>\n",now.y,now.x);
+		
+	    pnt_t next2= pnt_t {now.y+1,now.x};
+	    if(room.conflict(next2,type)) {
+		room.ins(now,type);
+		break;
+	    }else {
+		now=next2;
+	    }
+	}
+	
+    }
+    room.prt();
+
+    printf("<ans=%d>\n",room.ub);
+
+    
+	
+    //printf("<ans=%lld>\n", mmax);
+    return 0;
+}
