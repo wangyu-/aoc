@@ -1,4 +1,5 @@
 #include <unordered_set>
+#include <cstdio>
 using namespace std;
 
 struct Point {
@@ -6,7 +7,7 @@ struct Point {
     Point (int a,int b):y(a),x(b){}
     
     bool operator == (const Point &b) const{
-	printf("compare!!\n");
+	printf("compare!\n");
 	return y==b.y&& x==b.x;
     }
 };
@@ -23,13 +24,9 @@ int main(){
     st.insert(Point(-3,2));
     st.insert(Point(-4,3));  
 
-    if( st.find(Point{-3,2}) == st.end()){
+    if( st.find(Point(-3,2)) == st.end()){
 	printf("WTF!!!\n");
     }
   
-    unordered_set<Point,PointHash> tmp;
-    for(auto e:st) {
-	tmp.insert(e);
-    }	
     return 0;
 }
