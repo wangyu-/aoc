@@ -15,7 +15,7 @@ struct PointHash{
     size_t operator () (const Point & a) const
 	{
 	    //return a.y+a.x;
-	    return a.y*1000000007 +a.x;
+	    return a.y* 1000000007 + a.x;
 	}
 };
 unordered_set<Point,PointHash> st;
