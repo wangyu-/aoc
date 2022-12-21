@@ -21,10 +21,24 @@ struct cost_t {
         cout << "<" << ore << "," << clay << "," << obs << ">" << endl;
     }
 };
-const int MAGIC = 32;
+const int MAX_DAY = 32;
+struct vec_hash
+{
+    size_t operator() (const vector<short> v) const{
+        size_t r=0;
+        for(int i=0;i<(int)v.size();i++){
+            r+=(uint)v[i];
+            r*=107;
+        }
+        return r;
+    }
+};
 struct plan_t {
     int id;
-    unordered_map<string, int> dp[MAGIC + 1];
+    //hash key: (robot1, robot2, robot3, robot4, resouce1,resouce2, resouce3), hash value: resource4 
+    //optimization: robot4 is converted into resouce4 in advance, so in the hash table robot4 is always0
+    //so it's essentially a 6 dimension hash
+    unordered_map<vector<short>, int,vec_hash> dp[MAX_DAY + 1];  
     cost_t c[4];
     int max_res[3] = {0};
     void init() {
@@ -34,27 +48,27 @@ struct plan_t {
             }
         }
     }
-    string produce(string a) {
-        string res = a;
+    vector<short> produce(vector<short> a) {
+        vector<short> res = a;
         for (int i = 0; i < 4; i++) {
             res[4 + i] += a[i];
         }
         return res;
     }
-    int okay_for_robot(string a, int idx) {
+    int okay_for_robot(vector<short> a, int idx) {
         for (int i = 0; i < 3; i++)
             if (a[4 + i] < c[idx].get(i))
                 return 0;
         return 1;
     }
-    string pay_robot(string a, int idx) {
-        string r = a;
+    vector<short> pay_robot(vector<short> a, int idx) {
+        vector<short> r = a;
         for (int i = 0; i < 3; i++)
             r[4 + i] -= c[idx].get(i);
         // r[idx]+=1;
         return r;
     }
-    void prt(string a) {
+    void prt(vector<short> a) {
         for (int i = 0; i < 7; i++)
             printf("<%d>", a[i]);
         printf("\n");
@@ -65,7 +79,7 @@ struct plan_t {
             return 1;
         return 0;
     }
-    void insert(int idx, string a) {
+    void insert(int idx, vector<short> a) {
         int v = a[7];
         a[7] = 0;
         if (dp[idx].find(a) == dp[idx].end()) {
@@ -75,16 +89,16 @@ struct plan_t {
         }
     }
     int solve() {
-        string a(8, 0);
+        vector<short> a(8, 0);
         a[0] = 1; // first 4 is machine, last 4 is resource
         insert(0, a);
         int best = 0;
-        vector<string> cands;
-        for (int i = 0; i < MAGIC; i++) {
-            int days_left = MAGIC - i - 1;
+        vector<vector<short>> cands;
+        for (int i = 0; i < MAX_DAY; i++) {
+            int days_left = MAX_DAY - i - 1;
 
             printf("<day %d size=%d>\n", i, (int)dp[i].size());
-            string mmax(7, 0);
+            vector<short> mmax(7, 0);
             for (auto &pr : dp[i]) {
                 auto a = pr.first;
                 for (int j = 0; j < 7; j++) {
@@ -100,15 +114,15 @@ struct plan_t {
                 auto a = pr.first;
                 a[7] = pr.second;
                 cands.clear();
-                string a2 = produce(a);
+                vector<short> a2 = produce(a);
                 cands.push_back(a2);
                 for (int j = 0; j < 4; j++) {
                     if (okay_for_robot(a, j)) {
-                        string b = pay_robot(a, j);
-                        string b2 = produce(b);
+                        vector<short> b = pay_robot(a, j);
+                        vector<short> b2 = produce(b);
                         b2[j] += 1;
                         int skip = 0;
-                        // if num of machine is larger then resource consum skip this candidate
+                        // prune1: if produce rate (num of robot) is larger than max resource consume, skip
                         for (int idx = 0; idx < 3; idx++) {
                             if (b2[idx] > max_res[idx])
                                 skip = 1;
@@ -119,24 +133,24 @@ struct plan_t {
                 }
                 for (auto &cand : cands) {
                     for (int idx = 0; idx < 3; idx++) {
-                        // once your produce >= consume, and current >= consume, throw extra resouce away
+                        // prune2: once produce >= consume, and current >= consume, throw extra resouce away
                         if (cand[idx] >= max_res[idx] && cand[4 + idx] >= max_res[idx])
                             cand[4 + idx] = max_res[idx];
                         
-                        // stronger version of above, if your current + product in future >= you can consume in the left days, throw extra resource aways
+                        // prune3: stronger version of above, if your current + product in future >= you can consume in the left days, throw extra resource aways
                         if(cand[4 + idx]    >=   days_left * max_res[idx]  - days_left* cand[idx] +max_res[idx] ){
                             cand[4+idx]= days_left * max_res[idx]  - days_left* cand[idx] +max_res[idx];
                         }
                     }
 
-                    // convert type4 robot to resource direcly based on day left
+                    // optimization: convert type4 robot to resource direcly based on day left
                     if (cand[3] > 0) {
                         cand[7] += days_left * cand[3];
                         cand[3] = 0;
                     }
                     best = max((int)cand[7], best);
 
-                    // if in the flowing days, each day you get a new type4 robot, you still can't catch the best
+                    // prune4: if in the flowing days, each day you get a new type4 robot, you still can't catch the best
                     // then skip it;
                     if (!can_prune(days_left, best, cand[7])) {
                         insert(i + 1, cand);

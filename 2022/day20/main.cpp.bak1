@@ -1,0 +1,72 @@
+#include "mylibs.h"
+#include <vector>
+#define pii pair<int, int>
+#define mkp make_pair
+int test = 0;
+int main() {
+    vector<pii> arr;
+    auto lines = readlines();
+    int cnt=0;
+    for (auto line : lines) {
+        int a=stoi(line);
+        cout<<":"<<a<<endl;
+        arr.push_back( mkp (cnt,a) );
+        cnt++;
+    }
+
+    for(int i=0;i<ssize(arr);i++){
+        printf("\n[%d]\n",i);
+        int real_pos=-1;
+        for(int j=0;j<ssize(arr);j++)
+        {
+            if( arr[j].first==i) {
+                real_pos=j;
+                break;
+            }
+        }
+        assert(real_pos!=-1);
+        printf("[real_pos=%d]\n",real_pos);
+        int n=arr[real_pos].second;
+        int sign=1;
+        int M=ssize(arr)-1;
+        if(n==0) continue;
+        
+        int des= (real_pos+ n + 10*M)%M;
+        printf("<des=%d>\n",des);
+        
+        if(des==real_pos) continue;
+        if(des==0) des= M;
+        if(des>real_pos) { n=des-real_pos;}
+        else {
+            n=real_pos-des; sign=-1;
+            } 
+
+        //if(n<0) {sign=-1; n=-n;}
+        //n=(n+M)%M;
+        printf("[sign=%d n=%d]\n",sign,n);
+        while(n--)
+        {
+            int next= real_pos + sign;
+            //int next= (real_pos+ sign +M)%M;
+            swap(arr[real_pos], arr[next] );
+            real_pos= next;
+        }
+        printf("after step %d\n",i);
+        /*
+        for(int i=0;i<ssize(arr);i++)
+        {
+            printf("<%d>", arr[i].second);
+        }
+        printf("\n");*/
+    }
+    int zero_pos=-1;
+    for(int i=0;i<ssize(arr);i++)
+    {
+        if(arr[i].second==0) {zero_pos=i; break;}
+    }
+    int M2=ssize(arr);
+    printf("%d\n",arr[(zero_pos+1000)%M2 ].second);
+    printf("%d\n",arr[(zero_pos+2000)%M2 ].second);
+    printf("%d\n",arr[(zero_pos+3000)%M2 ].second);
+    return 0;
+}
