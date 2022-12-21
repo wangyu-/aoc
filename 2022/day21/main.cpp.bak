@@ -1,0 +1,80 @@
+#include "mylibs.h"
+#include <string>
+using namespace std;
+#define pii pair<int, int>
+#define pll pair<long, long>
+#define mkp make_pair
+int test = 0;
+//map <string,int> values;
+struct exp_t{
+    string a;
+    string op;
+    string b;
+    __int128 value;
+    bool done=0;
+};
+map <string, exp_t> exps;
+std::ostream& operator<<(std::ostream& o, const __int128& x) {
+    if (x == std::numeric_limits<__int128>::min()) return o << "-170141183460469231731687303715884105728";
+    if (x < 0) return o << "-" << -x;
+    if (x < 10) return o << (char)(x + '0');
+    return o << x / 10 << (char)(x % 10 + '0');
+}
+int main() {
+    auto lines=readlines();
+    //int last=301;
+    for(int i=0;i<1;i++)
+    {
+        exps.clear();
+        for(auto line :lines){
+            auto words= split_s(line, ": ");
+            auto exp_str= split_c(words[1], " ");
+            if(exp_str.size()==1) {
+                exp_t e;
+                e.value= stoi(exp_str[0]);
+                e.done=1;
+                exps[words[0]]=e;
+                //values[words[0]]=stoi(exp[0]);
+            }
+            else {
+                exp_t e;
+                e.a= exp_str[0];
+                e.b= exp_str[2];
+                e.op= exp_str[1];
+                exps[words[0]]=e;
+            }
+        }
+
+        exps["humn"].value=20000ll;
+        //last*=2;
+        while(1){
+            for( auto it =exps.begin();it!=exps.end();it++)
+            {
+                if(it->first == "root" && exps[it->second.a].done && exps[it->second.b].done) {
+                    cout<<"root1:"<<exps[it->second.a].value<<endl;
+                    cout<<"root2:"<<exps[it->second.b].value<<endl;
+                    cout<<"------"<<endl;
+                    //cout<<it->second.value<<endl;
+                    //printf("<ans=%ld>", it->second.value);
+                    goto line1;
+                }
+                if(it->second.done) continue;
+                if(exps[it->second.a].done  &&  exps[it->second.b].done) {
+                    __int128 a,b;__int128 r;
+                    a= exps[it->second.a].value;
+                    b= exps[it->second.b].value;
+                    string op=it->second.op;
+                    if(op=="+") r=a+b;
+                    else if(op=="-") r=a-b;
+                    else if(op=="*") r=a*b;
+                    else if(op=="/") r=a/b;
+                    else assert(0==1);
+                    it->second.done=1;
+                    it->second.value=r;
+                }
+            }
+        }
+        line1: ;
+    }
+    return 0;
+}
