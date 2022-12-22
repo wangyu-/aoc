@@ -12,19 +12,7 @@ vector<string> readlines()
     }
     return res;
 }
-string trim(const string &str, const string &in_sp)
-{
-    deque<char> q(str.begin(),str.end());
-    unordered_set<char> sp;
-    for(auto c: in_sp) sp.insert(c);
-    while(!q.empty() && sp.find(q.front())!=sp.end()) {
-	q.pop_front();
-    }
-    while(!q.empty() && sp.find(q.back())!=sp.end()) {
-	q.pop_back();
-    }
-    return string(q.begin(),q.end());
-}
+
 vector<string> split_c(const string &str,const string &in_sp)
 {
     vector<string> res;
@@ -32,14 +20,14 @@ vector<string> split_c(const string &str,const string &in_sp)
     for(auto c: in_sp) sp.insert(c);
     string current;
     for(auto c: str){
-	if(sp.find(c)==sp.end()) {
-	    current+= c;
-	}else{
-	    if(!current.empty()) {
-		res.push_back(current);
-		current.clear();
-	    }
-	}
+        if(sp.find(c)==sp.end()) {
+            current+= c;
+        }else{
+            if(!current.empty()) {
+            res.push_back(current);
+            current.clear();
+            }
+        }
     }
     if(!current.empty()) res.push_back(current);
     return res;
@@ -233,7 +221,6 @@ pair<Pnt, int> next_state(Pnt cur, int dir_idx) {
 
 int main() {
     auto lines = readlines();
-    // lines.pop_back();
     string inst = lines[ssize(lines) - 1];
 
     lines.pop_back();
