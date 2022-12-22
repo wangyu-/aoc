@@ -1,0 +1,226 @@
+#include "mylibs.h"
+#include <cassert>
+#include <ratio>
+#include <string>
+using namespace std;
+#define pii pair<int, int>
+#define pll pair<long, long>
+#define mkp make_pair
+int test = 0;
+
+char mat[300][300];
+pnt_t next[300][300][4];
+pnt_t dir[4]={{0,1},{1,0},{0,-1},{-1,0}};
+pnt_t start={-1,-1};
+int face=0;
+int y_size=-1,x_size=-1;
+
+struct info_t{
+    pnt_t face;
+    int new_dir;
+    int new_y;
+    int new_x;
+    info_t()=default;
+    info_t(int a,int b, int c,int d,int e){
+        face.y=a;face.x=b; 
+        new_dir=c;
+        new_y=d;
+        new_x=e;
+    }
+};
+set<pnt_t> all_possible;
+map<pnt_t, map <int, info_t>>  hard;
+const int R=0;
+const int D=1;
+const int L=2;
+const int U=3;
+
+const int the_y=1;
+const int inv_y=2;
+const int the_x=3;
+const int inv_x=4;
+pii invert(int new_y,int new_x) {
+    if(new_y == inv_x  && new_x==the_y) {
+        return mkp (the_x, inv_y);
+    }else if(new_y== the_x && new_x==inv_y) {
+        return mkp (inv_x, the_y);
+    }
+    return mkp(new_y,new_x);
+};
+void add(pnt_t a, int dir1, pnt_t b, int dir2,  int new_y,  int new_x){
+    all_possible.insert(a);
+    all_possible.insert(b);
+
+    int new_y_inv=invert(new_y,new_x).first;
+    int new_x_inv=invert(new_y,new_x).second;
+
+    hard[a][dir1]      = info_t{b.y,b.x,  dir2,         new_y,  new_x};
+    hard[b][(dir2+2)%4]= info_t{a.y,a.x,  (dir1+ 2)%4,  new_y_inv,  new_x_inv };
+};
+void init()
+{
+    add(pnt_t{0,2},R, pnt_t{2,1},L, inv_y, the_x);
+    add(pnt_t{0,2},D, pnt_t{1,1},L, the_x, the_y);
+    add(pnt_t{0,2},U, pnt_t{3,0},U, inv_y, the_x);
+
+    add(pnt_t{0,1},L, pnt_t{2,0},R, inv_y, the_x);
+    add(pnt_t{0,1},U, pnt_t{3,0},R, the_x, the_y);
+
+    add(pnt_t{1,1},L, pnt_t{2,0},D, the_x, the_y);    
+
+    add(pnt_t{2,1},D, pnt_t{3,0},L, the_x, the_y);  
+}
+const int MAGIC=50;
+int trans(pnt_t a, int type) {
+    if(type==the_y) return a.y;
+    else if(type==inv_y) return MAGIC-1-a.y;
+    else if(type==the_x) return a.x;
+    else if(type==inv_x) return MAGIC-1-a.x;
+    assert(0==1);
+ }
+pnt_t trans(pnt_t a, int new_y,int new_x)
+{
+    return pnt_t{ trans(a, new_y),  trans(a,new_x) };
+};
+
+void prt(pnt_t cur, pnt_t next){
+    char save1= mat[cur.y][cur.x]; mat[cur.y][cur.x]='@';
+    char save2= mat[next.y][next.x];mat[next.y][next.x]='%';
+
+    for(int y=0;y<y_size;y++){
+        for(int x=0;x<x_size;x++)
+        {
+            printf("%c",mat[y][x]);
+        }
+        printf("\n");
+    }
+    mat[cur.y][cur.x]= save1;
+    mat[next.y][next.x] =save2;   
+}
+pair<pnt_t,int> next_ne2 (pnt_t cur, int in_dir){
+    pnt_t face; face.y= cur.y/ MAGIC; face.x= cur.x/ MAGIC;
+    pnt_t rel; rel.y= cur.y%MAGIC; rel.x=cur.x%MAGIC;
+
+    pnt_t next_rel=rel; next_rel=next_rel + dir[in_dir];
+
+    //printf("[[next rel= %d %d]]\n", next_rel.y, next_rel.x);
+
+    bool same_face=  ( next_rel.y<MAGIC && next_rel.y>=0  && next_rel.x<MAGIC  &&  next_rel.x>=0);
+    
+    if(same_face || hard[face].find(in_dir)==hard[face].end() ) // still same face; or no special rul
+    {
+        pnt_t res= cur + dir[in_dir];
+        res.y= (res.y+ y_size) % y_size;
+        //res.x= (res.x+ x_size) % x_size;
+        //printf("normal move %d\n",same_face);
+        return  mkp(res, in_dir);
+    }
+
+    int new_dir= hard[face][in_dir].new_dir;
+    pnt_t new_face= hard[face][in_dir].face;
+
+    pnt_t new_rel= trans(rel,hard[face][in_dir].new_y, hard[face][in_dir].new_x);
+
+    pnt_t res{ new_face.y*MAGIC, new_face.x*MAGIC};
+    res=res+new_rel;
+
+    printf("\nspecial move!!\n");
+    printf("before: <%d,%d> (%d,%d) (%d,%d) %d\n", cur.y, cur.x , cur.y/MAGIC,cur.x/MAGIC, 
+            cur.y%MAGIC, cur.x%MAGIC, in_dir);
+    printf("after: <%d,%d> (%d,%d) (%d,%d) %d\n", res.y, res.x, res.y/MAGIC, res.x/MAGIC, 
+            res.y%MAGIC, res.x%MAGIC, new_dir);
+    //prt(cur,res);
+    return mkp(res, new_dir);
+
+};
+
+int main() {
+    init();
+    memset(mat,-1,sizeof(mat));
+    auto lines=readlines();
+    //lines.pop_back();
+    string inst=lines[ssize(lines)-1];
+    printf("%s\n",inst.c_str());
+    lines.pop_back();
+    lines.pop_back();
+    int max_col=0;
+    for(auto line:lines) {
+        max_col=max<int>(max_col, ssize(line));
+    }
+    printf("<max_col=%d>\n",max_col);
+    for(int i=0;i<ssize(lines);i++)
+    {
+        for(int j=0;j<max_col;j++)
+        {
+            mat[i][j]= (j<ssize(lines[i])? lines[i][j]:' ' );
+        }
+    }
+    y_size= ssize(lines);
+    x_size= max_col;
+
+    printf("<sizes= %d %d>\n",y_size,x_size);
+
+
+    for(int x=0;x<max_col;x++){
+        if(mat[0][x]=='.') {
+            start.y=0;
+            start.x=x;
+            break;
+        }
+    }
+
+    auto walks= split_c(inst,"LR");
+    auto turns= split_c(inst,"1234567890");
+
+    vector<string> all;
+
+    for(int i=0;i<ssize(walks);i++)
+    {
+        all.push_back(walks[i]);
+        if(i<ssize(turns)) all.push_back(turns[i]);
+    }
+
+    pnt_t cur=start;
+    for(auto ins: all)
+    {
+        //printf("current=<%d,%d>  <%d,%d> dir=%d\n",cur.y,cur.x, cur.y/MAGIC,cur.x/MAGIC ,face);
+        //printf("<ins= %s>\n",ins.c_str());
+        if(ins=="L"){
+            face= (face-1+4)%4;
+            continue;
+        }else if(ins=="R") {
+            face= (face+1+4)%4;
+            continue;
+        }
+        int nmoves= stoi(ins);
+        while(nmoves--)
+        {
+            //printf("<<<%d>>>\n",face);
+            auto res=next_ne2(cur, face);
+            auto next=res.first;
+            //printf("<<<%d %d>>>\n",next.y,next.x);
+            if(next.y<0 ||next.y>=y_size || next.x<0 ||next.x>=x_size){
+                printf("oops\n");
+                exit(-1);
+            } 
+            if( all_possible.find(pnt_t{next.y/MAGIC,next.x/MAGIC}) ==all_possible.end()){
+                printf("<<%d,%d>>\n", next.y/MAGIC,next.x/MAGIC);
+                printf("oops2\n");
+                exit(-1);
+            }
+            if(mat[next.y][next.x]=='#') {
+                break;
+            }
+            else{
+                cur=next;
+                face=res.second;
+            }
+        }
+    }
+    printf("current=<%d,%d> face=%d\n",cur.y,cur.x,face);
+
+    printf("<%d %d %d>\n",cur.y+1, cur.x+1, face);
+    printf("<ans=%d>\n", (cur.y+1)*1000 +(cur.x+1)*4+ face);
+
+    return 0;
+}

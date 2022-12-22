@@ -1,0 +1,110 @@
+#include "mylibs.h"
+#include <cassert>
+#include <ratio>
+#include <string>
+using namespace std;
+#define pii pair<int, int>
+#define pll pair<long, long>
+#define mkp make_pair
+int test = 0;
+
+char mat[300][300];
+pnt_t next[300][300][4];
+pnt_t dir[4]={{0,1},{1,0},{0,-1},{-1,0}};
+pnt_t start={-1,-1};
+int face=0;
+int y_size=-1,x_size=-1;
+pnt_t next_ne (pnt_t cur, int in_face){
+    //pnt_t next=cur;
+    while(1)
+    {
+        cur.x+=dir[in_face].x;
+        cur.y+=dir[in_face].y;
+        cur.y= (cur.y +y_size)% y_size;
+        cur.x= (cur.x+ x_size)% x_size;
+        
+        if(mat[cur.y][cur.x]!=' ') {
+            printf("[%c %d]",mat[cur.y][cur.x],mat[cur.y][cur.x]);
+            return cur;
+        }
+        /*
+        if(mat[cur.y][cur.x]=='.' || mat[cur.y][cur.x]=='#') {
+            return cur;
+        }*/
+    }
+};
+int main() {
+    memset(mat,-1,sizeof(mat));
+    auto lines=readlines();
+    lines.pop_back();
+    string inst=lines[ssize(lines)];
+    printf("%s\n",inst.c_str());
+    lines.pop_back();
+    int max_col=0;
+    for(auto line:lines) {
+        max_col=max<int>(max_col, ssize(line));
+    }
+    printf("<max_col=%d>\n",max_col);
+    for(int i=0;i<ssize(lines);i++)
+    {
+        for(int j=0;j<max_col;j++)
+        {
+            mat[i][j]= (j<ssize(lines[i])? lines[i][j]:' ' );
+        }
+    }
+    y_size= ssize(lines);
+    x_size= max_col;
+
+
+    for(int x=0;x<max_col;x++){
+        if(mat[0][x]=='.') {
+            start.y=0;
+            start.x=x;
+            break;
+        }
+    }
+
+    auto walks= split_c(inst,"LR");
+    auto turns= split_c(inst,"1234567890");
+
+    vector<string> all;
+
+    for(int i=0;i<ssize(walks);i++)
+    {
+        all.push_back(walks[i]);
+        if(i<ssize(turns)) all.push_back(turns[i]);
+    }
+
+    pnt_t cur=start;
+    for(auto ins: all)
+    {
+        printf("current=<%d,%d> face=%d\n",cur.y,cur.x,face);
+        printf("<ins= %s>\n",ins.c_str());
+        if(ins=="L"){
+            face= (face-1+4)%4;
+            continue;
+        }else if(ins=="R") {
+            face= (face+1+4)%4;
+            continue;
+        }
+        int nmoves= stoi(ins);
+        while(nmoves--)
+        {
+            //printf("<<<%d>>>\n",face);
+            pnt_t next=next_ne(cur, face);
+            printf("<<<%d %d>>>\n",next.y,next.x);
+            if(mat[next.y][next.x]=='#') {
+                break;
+            }
+            else{
+                cur=next;
+            }
+        }
+    }
+    printf("current=<%d,%d> face=%d\n",cur.y,cur.x,face);
+
+    printf("<%d %d %d>\n",cur.y+1, cur.x+1, face);
+    printf("<ans=%d>\n", (cur.y+1)*1000 +(cur.x+1)*4+ face);
+
+    return 0;
+}
