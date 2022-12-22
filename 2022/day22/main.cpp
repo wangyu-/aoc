@@ -13,6 +13,7 @@ vector<string> readlines()
     return res;
 }
 
+//split by char
 vector<string> split_c(const string &str,const string &in_sp)
 {
     vector<string> res;
@@ -103,6 +104,7 @@ int dir_idx = 0; //starting dir's idx
 void flood_fill(Pnt face_id) {
     auto &face = faces[face_id];
     int invariant_axis = -1;
+    //first, find the invariant axis on current face
     for (int i = 0; i < 3; i++) {
         int all_same = 1;
         for (int j = 1; j <= 3; j++) {
@@ -124,6 +126,7 @@ void flood_fill(Pnt face_id) {
         }
         auto &next_face = faces[next_face_id];
         next_face.resolved = 1;
+
         // adjecent corner's idx on the new face
         int near_corner1 = (i + 2 + 1) % 4;
         int near_corner2 = (i + 2) % 4;
@@ -131,14 +134,17 @@ void flood_fill(Pnt face_id) {
         int far_corner1 = i;
         int far_corner2 = (i + 1) % 4;
 
+        // fill the adjecent corners
         next_face.corners[near_corner1] = face.corners[far_corner1];
         next_face.corners[near_corner2] = face.corners[far_corner2];
 
+        // fill the non-adjecent corners, the invariant axis on current face will be the changing axis on next face
         next_face.corners[far_corner1] = face.corners[far_corner1];
         next_face.corners[far_corner1][invariant_axis] ^= 1;
 
         next_face.corners[far_corner2] = face.corners[far_corner2];
         next_face.corners[far_corner2][invariant_axis] ^= 1;
+        
         flood_fill(next_face_id);
     }
 };
@@ -298,7 +304,6 @@ int main() {
         }
         int nmoves = stoi(ins);
         while (nmoves--) {
-            // printf("<<<%d>>>\n",face);
             auto res = next_state(cur, dir_idx);
             auto next = res.first;
             if (mat[next.y][next.x] == '#') {
