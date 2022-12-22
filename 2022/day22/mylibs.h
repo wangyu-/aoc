@@ -1,33 +1,14 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-struct Pnt {
-    int y,x;
-    Pnt () =default;
-    Pnt (int a,int b):y(a),x(b){}
 
-    bool operator == (const Pnt &b) const{
-	return y==b.y&& x==b.x;
-    }
-    
-    bool operator < (const Pnt &b) const{
-	if(y!=b.y) return y<b.y;
-	return x<b.x;
-    }
-
-    Pnt operator +(const Pnt &b) const{
-        return Pnt{y+b.y, x+b.x};
-    }
-};
-
-
-
+/*
 struct pnt_hash{
     size_t operator () (const Pnt & a) const
 	{
 	    return a.y*100007u +a.x;
 	}
-};
+};*/
 
 vector<string> readlines()
 {
