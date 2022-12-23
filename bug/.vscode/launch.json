@@ -6,28 +6,12 @@
     "configurations": [
         {
             "name": "(lldb) debug main",
-            "type": "cppdbg",
+            "type": "lldb",
             "request": "launch",
             "program": "${workspaceFolder}/./a.out",
             "args": [],
-            "stopAtEntry": false,
             "cwd": "${fileDirname}",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "lldb",
             "preLaunchTask": "compile_main"
         },
-        {
-            "name": "(lldb) x86 debug main",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/./a.out",
-            "args": [],
-            "stopAtEntry": false,
-            "cwd": "${fileDirname}",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "lldb",
-        }
     ]
 }
